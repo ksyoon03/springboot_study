@@ -1,10 +1,15 @@
 package com.study.koreait.controller;
 
+import com.study.koreait.dto.AddPostReqDto;
+import com.study.koreait.dto.AddProductReqDto;
 import com.study.koreait.dto.ProductResDto;
+import com.study.koreait.exception.ProductException;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +34,7 @@ public class StudyController2 {
     }
 
     @GetMapping("/product/{id}")
-    public Map<String, Object> getProductById(@PathVariable int id){
+    public ResponseEntity<?> getProductById(@PathVariable int id){
         List<ProductResDto> dtos = List.of(
                 new ProductResDto(1, "아이패드", 8500),
                 new ProductResDto(2, "아이폰", 8501),
@@ -41,11 +46,12 @@ public class StudyController2 {
                 .filter(s -> s.getId() == id)
                 .findFirst();
 
-        if(optDto.isEmpty()){
-            return Map.of("error", "존재하지 않는 제품 id입니다.");
-        }
+        // Optional.orElseThrow() -
+        // 커스텀 에러를 던져줘야 한다.
+        ProductResDto dto = optDto.orElseThrow(()
+                -> new ProductException("해당 id는 존재하지 않습니다.", HttpStatus.NOT_FOUND));
 
-        return Map.of("success", optDto);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/product/range")
@@ -66,5 +72,32 @@ public class StudyController2 {
         }
 
         return Map.of("success", datas);
+    }
+
+    // post(만들겠다) + /post => 게시글을 등록하겠다
+    // post 요청 + /posts =? 게시글 여러개를 등록하겠다
+    // (요청 메서드 + 요청 URL)은 중복되면 안됨
+    @PostMapping("/post")
+    public ResponseEntity<?> makePost(@RequestBody @Valid AddPostReqDto dto){
+        log.info("들어온 데이터: {}", dto);
+
+        return ResponseEntity   // header와 body로 나뉨
+                .status(HttpStatus.CREATED)
+                .body("성공");
+    }
+
+    // PUT: 수정 - 전체 덮어쓰기
+    // PATCH: 수정 - 부분 수정
+
+    // DELETE는 body가 있으나, path로 지정
+    @DeleteMapping("/post/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable int id){
+        return ResponseEntity.ok("성공");
+    }
+
+    @PostMapping("/product")
+    public ResponseEntity<?> addProduct(@RequestBody @Valid AddProductReqDto dto){
+        log.info("들어온 데이터: {}", dto);
+        return ResponseEntity.ok("상품 등록 완료");
     }
 }

@@ -1,7 +1,11 @@
 package com.study.koreait.controller;
 
 import com.study.koreait.dto.StudentResDto;
+import com.study.koreait.dto.StudyReqDto;
+import com.study.koreait.exception.StudentException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,7 +49,7 @@ public class StudyController1 {
 
     // @PathVariable: {경로변수}와 매개변수가 이름이 같으면 (" ")를 생략 가능
     @GetMapping("/test3/{number}")
-    public Map<String, Object> getStudentById(@PathVariable("number") int id){
+    public ResponseEntity<?> getStudentById(@PathVariable("number") int id){
         List<StudentResDto> dtos = List.of(
                 new StudentResDto(1, "피카츄", 10),
                 new StudentResDto(2, "라이츄", 20),
@@ -57,22 +61,55 @@ public class StudyController1 {
                 .filter(s -> s.getId() == id)
                 .findFirst();
 
-        if(optDto.isEmpty()){
-            return Map.of("error", "해당 id 학생은 존재하지 않음");
-        }
+        StudentResDto dto = optDto.orElseThrow(()
+                -> new StudentException("해당 id는 존재하지 않습니다.", HttpStatus.NOT_FOUND));
 
         StudentResDto target = null;
-        for(StudentResDto dto : dtos){
-            if(dto.getId() == id) {
-                target = dto;
+        for(StudentResDto d : dtos){
+            if(d.getId() == id) {
+                target = d;
                 break;
             }
         }
 
         if(target == null){
-            return Map.of("error", "해당 id 학생은 존재하지 않음");
+            return ResponseEntity.ok(dto);
         }
 
-        return Map.of("success", target);
+        return ResponseEntity.ok(dto);
     }
+
+    // GET 요청을 제외한 모든 요청 메서드들은 body가 존재함
+    // JSON을 담아서 서버로 전송
+    @PostMapping("/test4")
+    public String test4(@RequestBody Map<String, Object> data){
+        // RequestBody -> body에 있는 JSON 객체로 변환
+        // jackson 라이브러리가 자동 개입
+        log.info("test4 컨트롤러 수신");
+        log.info("들어온 데이터: {}", data);
+
+        return "성공";
+    }
+
+    @PostMapping("/test5") // dto
+    public ResponseEntity<?> test5(@RequestBody StudyReqDto dto){
+        // 필드명과 Json Key 이름이 동일해야함
+        // *매칭이 안된다면 Null 값이 들어감*
+        log.info("들어온 data: {}", dto);
+        /*
+            HTTP 상태코드
+            200대 -> 성공
+            400대 -> 요청을 잘못했다
+            500대 -> 서버가 잘못했다
+
+            200 OK, 201 CREATED
+            400 BAD_REQUEST, 401 UNAUTHORIZED, 403 FORBIDDEN, 404 NOT_FOUND
+         */
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("성공");
+    }
+
+
 }
