@@ -16,6 +16,14 @@ public interface ProductRepository {
     Product findProductById(int id);
 
     // 새 상품 등록
-    // int insertProduct();
+     int insertProduct(Product product);
 
+     // 단건 삭제
+    int deleteProductByID(int id);
+
+    // 수정
+    int updateProductById(Product product);
+
+    // 검색
+    List<Product> searchProductByName(String name);
 }

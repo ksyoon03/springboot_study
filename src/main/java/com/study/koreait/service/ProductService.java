@@ -1,6 +1,9 @@
 package com.study.koreait.service;
 
+import com.study.koreait.dto.AddProductReqDto;
 import com.study.koreait.dto.FindProductResDto;
+import com.study.koreait.dto.ModifyProductReqDto;
+import com.study.koreait.dto.ProductResDto;
 import com.study.koreait.entity.Product;
 import com.study.koreait.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +33,24 @@ public class ProductService {
     // 메서드마다 dto를 작성해줘야함
     public FindProductResDto getProductById(int id){
         return repository.findProductById(id).toFindProductResDto();
+    }
+
+    public int addProduct(AddProductReqDto dto){
+        return repository.insertProduct(dto.toEntity());
+    }
+
+    public int removeProduct(int id){
+        return repository.deleteProductByID(id);
+    }
+
+    public int modifyProduct(int id, ModifyProductReqDto dto){
+        return repository.updateProductById(dto.toEntity(id));
+    }
+
+    // dto는 공유하는 용도가 아님
+    public List<FindProductResDto> getSearchProducts(String name){
+        return repository.searchProductByName(name).stream()
+                .map(Product::toFindProductResDto)
+                .toList();
     }
 }

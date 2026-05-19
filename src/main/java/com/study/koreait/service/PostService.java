@@ -1,5 +1,6 @@
 package com.study.koreait.service;
 
+import com.study.koreait.dto.AddPostReqDto;
 import com.study.koreait.entity.Post;
 import com.study.koreait.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,13 @@ public class PostService {
 
     public Post getPostById(int id){
         return repository.findPostById(id);
+    }
+
+    public int addPost(AddPostReqDto dto){
+        return repository.insertPost(dto.toEntity());
+    }
+
+    public int removePost(int id){
+        return repository.deletePostById(id);
     }
 }

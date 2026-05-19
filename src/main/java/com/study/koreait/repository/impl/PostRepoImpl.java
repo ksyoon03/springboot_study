@@ -1,8 +1,10 @@
 package com.study.koreait.repository.impl;
 
 import com.study.koreait.entity.Post;
+import com.study.koreait.exception.PostException;
 import com.study.koreait.exception.ProductException;
 import com.study.koreait.repository.PostRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Slf4j
 public class PostRepoImpl implements PostRepository {
 
     // DB 대용
@@ -42,5 +45,38 @@ public class PostRepoImpl implements PostRepository {
         }
 
         return optPost.get();
+    }
+
+    @Override
+    public int insertPost(Post post) {
+        int maxId = 0;
+        for(Post p : posts){
+            int postId = p.getPostId();
+            if(postId > maxId){
+                maxId = postId;
+            }
+        }
+
+        Post newPost = Post.builder()
+                .postId(maxId)
+                .title(maxId + "번 게시물")
+                .content(maxId + "빠")
+                .build();
+
+        return 1;
+    }
+
+    @Override
+    public int deletePostById(int id) {
+        Optional<Post> optPost = posts.stream()
+                .filter(p -> p.getPostId() == id)
+                .findFirst();
+
+        Post post = optPost.orElseThrow(() -> new PostException("해당 ID의 게시물은 존재하지 않습니다.", HttpStatus.NOT_FOUND));
+
+        posts.remove(id);
+        log.info("게시물 삭제 완료: {}", post);
+
+        return 1;
     }
 }

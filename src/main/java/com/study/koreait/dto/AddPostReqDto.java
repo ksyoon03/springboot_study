@@ -1,5 +1,6 @@
 package com.study.koreait.dto;
 
+import com.study.koreait.entity.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -43,4 +44,11 @@ public class AddPostReqDto {
 
     // dto가 자동으로 생성될텐데,
     // 우리가 원하는 값이 아니면, 예의(Exception)을 일으킴.
+
+    public Post toEntity(){
+        return Post.builder()
+                .title(title)
+                .content(content)
+                .build();
+    }
 }

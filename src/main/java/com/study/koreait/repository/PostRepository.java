@@ -10,4 +10,7 @@ public interface PostRepository {
 
     Post findPostById(int id);
 
+    public int insertPost(Post post);
+
+    public int deletePostById(int id);
 }
