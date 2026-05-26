@@ -18,6 +18,7 @@ public class PostService {
     }
 
     public Post getPostById(int id){
+
         return repository.findPostById(id);
     }
 
