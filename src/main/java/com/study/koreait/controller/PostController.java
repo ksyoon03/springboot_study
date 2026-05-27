@@ -1,7 +1,6 @@
 package com.study.koreait.controller;
 
 import com.study.koreait.dto.AddPostReqDto;
-import com.study.koreait.entity.Post;
 import com.study.koreait.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +36,10 @@ public class PostController {
     public ResponseEntity<?> deletePost(@PathVariable int id){
         int successCount = service.removePost(id);
         return ResponseEntity.ok(successCount + "건 삭제 완료");
+    }
+
+    @GetMapping("/all/comments")
+    public ResponseEntity<?> getPostWithComments(){
+        return ResponseEntity.ok(service.getPostWithComments());
     }
 }
