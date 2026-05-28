@@ -22,26 +22,51 @@
         <result property="body" column="body" />
 <!--        <result property="createAt" column="create_at" />-->
     </resultMap>
-    
+
     <!--  SQL  -->
     <!--  id: 추상메서드 이름을 매핑해줌  -->
-    <select
-            id="findAll"
-            resultType="Post"
-    >
+    <select id="findAll" resultType="Post">
         SELECT * FROM post
     </select>
 
     <!--  LEFT 조인할 때 comments가 없는 post는 빈 리스트를 만들어옴  -->
-    <select
-            id="findAllPostsWithComments"
-            resultMap="postMap"
-    >
+    <select id="findAllPostsWithComments" resultMap="postMap">
         SELECT p.post_id, p.title, p.content, p.create_at, c.comment_id, c.author, c.body
         FROM post p
         LEFT JOIN comments c ON p.post_id = c.post_id
         ORDER BY p.post_id, c.comment_id
     </select>
 
+    <insert id="insertPost">
+        INSERT INTO post(title, content)
+        VALUES(#{title}, #{content})
+    </insert>
+
+    <!--  매개변수 이름을 ${}에 작성 가능}  -->
+    <delete id="deletePostById">
+        DELETE FROM post
+        WHERE post_id = #{id}
+    </delete>
+
+    <select id="detailSearchPosts" resultType="Post">
+        SELECT title, content, create_at
+        FROM post
+        WHERE 1=1
+        <if test="titleKeyword != null and titleKeyword != ''">
+            AND title LIKE CONCAT('%', #{titleKeyword}, '%')
+        </if>
+        <if test="contentKeyword != null and contentKeyword != ''">
+            AND content LIKE CONCAT('%', #{contentKeyword}, '%')
+        </if>
+        ORDER BY create_at DESC
+    </select>
+
+    <insert id="insertPosts">
+        INSERT INTO post (title, content)
+        VALUES
+            <foreach collection="posts" item="post" separator=",">
+                (#{post.title}, #{post.content})
+            </foreach>
+    </insert>
 
 </mapper>

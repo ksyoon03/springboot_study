@@ -1,12 +1,15 @@
 package com.study.koreait.controller;
 
 import com.study.koreait.dto.AddPostReqDto;
+import com.study.koreait.dto.SearchPostReqDto;
 import com.study.koreait.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/post")
@@ -41,5 +44,18 @@ public class PostController {
     @GetMapping("/all/comments")
     public ResponseEntity<?> getPostWithComments(){
         return ResponseEntity.ok(service.getPostWithComments());
+    }
+
+    // 원래는 쿼리스트링을 객체로 받으려면, @ModelAttribute
+    // 하지만, json key와 필드변수명이 동일하면 생략 ok
+    @GetMapping("/search/dynamic")
+    public ResponseEntity<?> searchDynamicPosts(SearchPostReqDto dto){
+        return ResponseEntity.ok(service.searchDynamicPosts(dto));
+    }
+
+    @PostMapping("/add/bulk")
+    public ResponseEntity<?> addPosts(@RequestBody List<AddPostReqDto> dtos){
+        int sc = service.addBulkPosts(dtos);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sc + "건 생성 완료");
     }
 }

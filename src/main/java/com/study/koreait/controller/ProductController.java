@@ -2,6 +2,7 @@ package com.study.koreait.controller;
 
 import com.study.koreait.dto.AddProductReqDto;
 import com.study.koreait.dto.ModifyProductReqDto;
+import com.study.koreait.dto.SearchProductReqDto;
 import com.study.koreait.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Modifier;
+import java.util.List;
 
 @RestController
 @RequestMapping("/product")
@@ -52,5 +53,23 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<?> getProductByName(@RequestParam String name){
         return ResponseEntity.ok(service.getSearchProducts(name));
+    }
+
+    @GetMapping("/search/dynamic")
+    public ResponseEntity<?> searchProductsDynamic(SearchProductReqDto dto){
+        return ResponseEntity.ok(service.dynamicSearchProduct(dto));
+    }
+
+    @GetMapping("/search/priority")
+    public ResponseEntity<?> searchProductsPriority(SearchProductReqDto dto){
+        return ResponseEntity.ok(service.prioritySearchProduct(dto));
+    }
+
+    @PostMapping("/add/bulk")
+    public ResponseEntity<?> addProducts(@RequestBody List<AddProductReqDto> dtos){
+        int successCount = service.addBulkProducts(dtos);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(successCount + "건 등록 성공");
     }
 }

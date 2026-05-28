@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.koreait.mapper.ProductMapper">
+    <!--  ResultMap  -->
+    <resultMap id="productMap" type="Product">
+        <id property="productId" column="product_id" />
+        <result property="productName" column="product_name" />
+        <result property="price" column="price" />
+        <result property="createAt" column="create_at" />
+    </resultMap>
+
+    <!--  SQL  -->
+    <insert id="insertProduct">
+        INSERT INTO product(product_name, price, create_at)
+        VALUES(#{productName}, #{price}, now())
+    </insert>
+
+    <delete id="deleteProductByID">
+        DELETE FROM product
+        WHERE product_id = #{id}
+    </delete>
+
+    <!--  sql 내장함수도 사용 가능  -->
+    <select id="searchProductByName" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE product_name LIKE CONCAT('%', #{productName}, '%')
+    </select>
+
+    <select id="findProductById" resultType="Product" parameterType="int">
+        SELECT *
+        FROM product
+        WHERE product_id = #{id}
+    </select>
+
+    <select id="findAllProducts" resultType="Product">
+        SELECT * FROM product
+    </select>
+
+    <!--  name 필터, 최소가격, 최대가격 필터가 각각 존재할 수도 없을 수도 있음  -->
+    <!--    -->
+    <select id="detailSearchProduct" resultType="Product">
+        SELECT * FROM product WHERE 1=1
+        <if test="nameKeyword != null and nameKeyword != ''">
+            AND product_name LIKE CONCAT('%', #{nameKeyword}, '%')
+        </if>
+        <!--    xml에서 대소비교 시 > or < 사용 시 주의해야함    -->
+        <!--    >는 &gt;로, <는 &lt;로 치환해서 사용    -->
+        <if test="minPrice != null">
+            AND price &gt;= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND price &lt;= #{maxPrice}
+        </if>
+        ORDER BY product_id DESC
+    </select>
+
+    <!--  선택 검색: 조건 중 하나(if-elif-else) 쿼리를 조립할 수 있음  -->
+    <!--  우선 조건 검색  -->
+    <select id="chooseSearchProduct" resultType="Product">
+        SELECT *
+        FROM product
+        WHERE 1=1
+        <!-- <if>와 다르게 위에서 아래로 순차적으로 test 검사 -->
+        <!-- true가 나오면 해당 태그의 쿼리 조립 후 탈출 -->
+        <choose>
+            <when test="minPrice != null">
+                AND price &gt;= #{minPrice}
+            </when>
+            <when test="maxPrice != null">
+                AND price &lt;= #{maxPrice}
+            </when>
+            <otherwise>
+                <!--  else에 해당함. 다른 조건이 모두 false일 때 실행  -->
+            </otherwise>
+        </choose>
+        ORDER BY product_id DESC
+    </select>
+
+    <!-- 다중 INSERT: 쿼리가 반복적으로 들어가야 할 경우 -->
+    <!-- 매개변수로 List가 들어올 경우 -->
+    <insert id="insertProducts">
+        INSERT INTO product (product_name, price)
+        VALUES
+            <!-- collection: 매개변수로 들어온 List 변수명, @Param("변수명") -->
+            <!-- item: collection에서 하나씩 꺼냈을 때 담을 변수명 -->
+            <!-- separator: item들 사이의 구분자 -->
+            <foreach collection="products" item="product" separator=",">
+                (#{product.productName}, #{product.price})
+            </foreach>
+    </insert>
+
+</mapper>
